@@ -1,0 +1,6 @@
+*.md
+docker-compose*
+Dockerfile
+.dockerignore
+postgresql.conf
+nginx.conf
