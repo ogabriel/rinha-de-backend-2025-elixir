@@ -1,0 +1,21 @@
+# fast way to start test
+# standalone way to do test
+
+backend-%:
+	docker compose $(subst backend-,,$@)
+
+processor-%:
+	docker compose -f ../rinha-de-backend-2025/payment-processor/docker-compose.yml $(subst processor-,,$@)
+
+reset:
+	make processor-down
+	make backend-down
+
+test:
+	make backend-up
+	make processor-up
+	until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9999/healthcheck)" = "200" ]; do sleep 1; done;
+	K6_WEB_DASHBOARD=true k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
+
+start-test-low:
+	MAX_REQUESTS=100 K6_WEB_DASHBOARD=true k6 run ../rinha-de-backend-2025/rinha-test/rinha.js

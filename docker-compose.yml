@@ -1,0 +1,54 @@
+services:
+  nginx:
+    image: nginx:mainline-alpine3.22
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    command: ["nginx", "-g", "daemon off;"]
+    networks:
+      - backend
+    depends_on:
+      - app1
+      - app2
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: '50MB'
+
+  app1: &app1
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: release
+    environment: &env_app1
+      MIX_ENV: prod
+      SECRET_KEY_BASE: xUZ2aYKI10TzUGY4juCkDIpip9LaDi8KOj0emd8HOHiFZh2zKT5sLXg+0/wzHfnw
+      ERL_MAX_PORTS: 2046
+      PORT: 9999
+      RELEASE_DISTRIBUTION: name
+      RELEASE_NODE: app1@127.0.0.1
+    command: ["migrate_and_release"]
+    networks:
+      - backend
+      - payment-processor
+    deploy:
+      resources:
+        limits:
+          cpus: '0.35'
+          memory: '120MB'
+
+  app2:
+    <<: *app1
+    depends_on:
+      - app1
+    environment:
+      <<: *env_app1
+      PORT: 9999
+      RELEASE_NODE: app2@127.0.0.1
+    command: ["release"]
+
+networks:
+  backend:
+    driver: bridge
+  payment-processor:
+    external: true
