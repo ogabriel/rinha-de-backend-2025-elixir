@@ -9,6 +9,12 @@ defmodule Rinha.Router do
   plug(:match)
   plug(:dispatch)
 
+  post "/payments" do
+  end
+
+  get "payments-summary" do
+  end
+
   get "/up" do
     send_resp(conn, 200, "a")
   end
