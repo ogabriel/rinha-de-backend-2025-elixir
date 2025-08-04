@@ -9,6 +9,7 @@ defmodule Rinha.Application do
   def start(_type, _args) do
     children = [
       PlugCodeReloader.Server,
+      {Finch, name: Rinha.Finch},
       {Bandit, plug: Rinha.Router, port: 9999}
     ]
 

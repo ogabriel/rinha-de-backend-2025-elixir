@@ -23,6 +23,7 @@ defmodule Rinha.MixProject do
   defp deps do
     [
       {:bandit, "~> 1.0"},
+      {:finch, "~> 0.20"},
       {:plug_code_reloader, "~> 0.1.0", only: :dev}
     ]
   end
