@@ -2,6 +2,7 @@ defmodule Rinha.Router do
   use Plug.Router
 
   if Mix.env() == :dev do
+    plug(PlugCodeReloader)
     plug(Plug.Logger)
   end
 

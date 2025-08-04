@@ -22,7 +22,8 @@ defmodule Rinha.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:bandit, "~> 1.0"}
+      {:bandit, "~> 1.0"},
+      {:plug_code_reloader, "~> 0.1.0", only: :dev}
     ]
   end
 end
