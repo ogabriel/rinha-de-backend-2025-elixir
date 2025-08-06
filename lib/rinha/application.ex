@@ -8,14 +8,29 @@ defmodule Rinha.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      PlugCodeReloader.Server,
-      {Finch, name: Rinha.Finch},
+      Rinha.Payments,
+      Rinha.Processor.Health,
+      {Finch,
+       name: Rinha.Finch,
+       pools: %{
+         :default => [size: 350, count: 4]
+       }},
       {Bandit, plug: Rinha.Router, port: 9999}
     ]
+
+    children = add_code_reloader(children)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Rinha.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp add_code_reloader(children) do
+    if Code.ensure_loaded?(Mix) && Mix.env() == :dev do
+      [PlugCodeReloader.Server | children]
+    else
+      children
+    end
   end
 end

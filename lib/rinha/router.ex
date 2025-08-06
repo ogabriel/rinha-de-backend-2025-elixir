@@ -19,7 +19,7 @@ defmodule Rinha.Router do
 
       body = Map.put(body, "requestedAt", DateTime.utc_now() |> DateTime.to_iso8601())
 
-      Rinha.ProcessorClient.call(body)
+      Rinha.ProcessorClient.call(JSON.encode_to_iodata!(body))
 
       Rinha.Payments.insert(%{
         correlationId: body["correlationId"],

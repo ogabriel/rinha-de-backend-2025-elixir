@@ -6,16 +6,19 @@ defmodule Rinha.ProcessorClient do
   ]
 
   def call(payload) do
-    payload = JSON.encode_to_iodata!(payload)
+    url =
+      case Rinha.Processor.Health.get_best_processor() do
+        :default ->
+          @default
 
-    call_api(payload)
-  end
+        :fallback ->
+          @fallback
+      end
 
-  def call_api(payload) do
-    case Finch.build(:post, @default, @headers, payload)
+    case Finch.build(:post, url, @headers, payload)
          |> Finch.request(Rinha.Finch) do
       {:ok, %{status: 200}} -> :ok
-      _ -> call_api(payload)
+      _ -> call(payload)
     end
   end
 
