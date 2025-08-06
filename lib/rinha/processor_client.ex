@@ -23,7 +23,7 @@ defmodule Rinha.ProcessorClient do
     case Finch.build(:get, "#{@default}/service-health")
          |> Finch.request(Rinha.Finch) do
       {:ok, %{status: 200, body: body}} ->
-        {:ok, JSON.decode!(body)}
+        {:ok, parse_payload!(body)}
 
       {:ok, %{status: 429}} ->
         # TODO: maybe put sleep
@@ -38,7 +38,7 @@ defmodule Rinha.ProcessorClient do
     case Finch.build(:get, "#{@fallback}/service-health")
          |> Finch.request(Rinha.Finch) do
       {:ok, %{status: 200, body: body}} ->
-        {:ok, JSON.decode!(body)}
+        {:ok, parse_payload!(body)}
 
       {:ok, %{status: 429}} ->
         # TODO: maybe put sleep
@@ -46,6 +46,12 @@ defmodule Rinha.ProcessorClient do
 
       _ ->
         :error
+    end
+  end
+
+  defp parse_payload!(body) do
+    case JSON.decode(body, :ok, object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end) do
+      {parsed, :ok, _} -> parsed
     end
   end
 end
