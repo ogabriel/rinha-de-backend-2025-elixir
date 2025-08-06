@@ -13,7 +13,7 @@ defmodule Rinha.Application do
       {Finch,
        name: Rinha.Finch,
        pools: %{
-         :default => [size: 350, count: 4]
+         :default => [size: 350, count: 1]
        }},
       {Bandit, plug: Rinha.Router, port: 9999}
     ]

@@ -1,10 +1,10 @@
 defmodule Rinha.Router do
   use Plug.Router
 
-  if Code.ensure_loaded?(Mix) && Mix.env() == :dev do
-    plug(PlugCodeReloader)
-    plug(Plug.Logger)
-  end
+  # if Code.ensure_loaded?(Mix) && Mix.env() == :dev do
+  #   plug(PlugCodeReloader)
+  #   plug(Plug.Logger)
+  # end
 
   plug(:match)
   plug(:dispatch)
@@ -19,13 +19,13 @@ defmodule Rinha.Router do
 
       body = Map.put(body, "requestedAt", DateTime.utc_now() |> DateTime.to_iso8601())
 
-      Rinha.ProcessorClient.call(JSON.encode_to_iodata!(body))
+      processor = Rinha.ProcessorClient.call(JSON.encode_to_iodata!(body))
 
       Rinha.Payments.insert(%{
         correlationId: body["correlationId"],
         # TOOD: fix decimal
         amount: body["amount"],
-        processor: :default,
+        processor: processor,
         requestedAt: body["requestedAt"]
       })
     end)

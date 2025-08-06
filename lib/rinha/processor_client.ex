@@ -6,8 +6,10 @@ defmodule Rinha.ProcessorClient do
   ]
 
   def call(payload) do
+    processor = Rinha.Processor.Health.get_best_processor()
+
     url =
-      case Rinha.Processor.Health.get_best_processor() do
+      case processor do
         :default ->
           @default
 
@@ -17,7 +19,7 @@ defmodule Rinha.ProcessorClient do
 
     case Finch.build(:post, url, @headers, payload)
          |> Finch.request(Rinha.Finch) do
-      {:ok, %{status: 200}} -> :ok
+      {:ok, %{status: 200}} -> processor
       _ -> call(payload)
     end
   end

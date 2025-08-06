@@ -48,7 +48,7 @@ defmodule Rinha.Processor.Health do
   def parse_best_processor({:ok, %{failing: true}}, {:ok, _}), do: :fallback
 
   def parse_best_processor({:ok, %{minResponseTime: default}}, {:ok, %{minResponseTime: fallback}}) do
-    if default + 100 > fallback do
+    if default > fallback + 100 do
       :fallback
     else
       :default
