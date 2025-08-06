@@ -12,7 +12,7 @@ defmodule Rinha.Router do
   post "/payments" do
     {:ok, body, _} = Plug.Conn.read_body(conn)
 
-    Task.async(fn ->
+    Task.Supervisor.start_child(Rinha.TaskSupervisor, fn ->
       {body, :ok, _} =
         JSON.decode(body, {:requestedAt, DateTime.utc_now() |> DateTime.to_iso8601()},
           object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end,

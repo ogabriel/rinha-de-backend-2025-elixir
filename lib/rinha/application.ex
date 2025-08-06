@@ -10,6 +10,7 @@ defmodule Rinha.Application do
     children = [
       Rinha.Payments,
       Rinha.Processor.Health,
+      {Task.Supervisor, name: Rinha.TaskSupervisor},
       {Finch,
        name: Rinha.Finch,
        pools: %{
