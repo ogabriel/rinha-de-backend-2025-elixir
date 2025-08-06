@@ -14,7 +14,9 @@ reset:
 test:
 	make backend-up
 	make processor-up
-	until [ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost:9999/healthcheck)" = "200" ]; do sleep 1; done;
+	make start-test
+
+start-test:
 	K6_WEB_DASHBOARD=true k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
 
 start-test-low:
