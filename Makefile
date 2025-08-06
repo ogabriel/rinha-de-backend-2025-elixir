@@ -4,6 +4,9 @@
 backend-%:
 	docker compose $(subst backend-,,$@)
 
+backend-up-build:
+	docker compose up --build
+
 processor-%:
 	docker compose -f ../rinha-de-backend-2025/payment-processor/docker-compose.yml $(subst processor-,,$@)
 
