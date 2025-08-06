@@ -18,4 +18,34 @@ defmodule Rinha.ProcessorClient do
       _ -> call_api(payload)
     end
   end
+
+  def default_health do
+    case Finch.build(:get, "#{@default}/service-health")
+         |> Finch.request(Rinha.Finch) do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, JSON.decode!(body)}
+
+      {:ok, %{status: 429}} ->
+        # TODO: maybe put sleep
+        default_health()
+
+      _ ->
+        :error
+    end
+  end
+
+  def fallback_health do
+    case Finch.build(:get, "#{@fallback}/service-health")
+         |> Finch.request(Rinha.Finch) do
+      {:ok, %{status: 200, body: body}} ->
+        {:ok, JSON.decode!(body)}
+
+      {:ok, %{status: 429}} ->
+        # TODO: maybe put sleep
+        default_health()
+
+      _ ->
+        :error
+    end
+  end
 end
