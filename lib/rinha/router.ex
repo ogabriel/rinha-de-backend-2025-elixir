@@ -16,8 +16,8 @@ defmodule Rinha.Router do
       {body, :ok, _} =
         JSON.decode(body, {:requestedAt, DateTime.utc_now() |> DateTime.to_iso8601()},
           object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end,
-          object_finish: fn acc, old_acc -> {Map.new([old_acc | acc]), :ok} end,
-          float: & &1
+          object_finish: fn acc, old_acc -> {Map.new([old_acc | acc]), :ok} end
+          # float: & &1
         )
 
       processor = Rinha.Processor.Client.call(JSON.encode_to_iodata!(body))
@@ -45,11 +45,11 @@ defmodule Rinha.Router do
     result = %{
       default: %{
         totalRequests: default_requests,
-        totalAmount: default_amount
+        totalAmount: default_amount / 100
       },
       fallback: %{
         totalRequests: fallback_requests,
-        totalAmount: fallback_amount
+        totalAmount: fallback_amount / 100
       }
     }
 
