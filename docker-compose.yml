@@ -4,6 +4,8 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
     command: ["nginx", "-g", "daemon off;"]
+    ports:
+      - 9999:9999
     networks:
       - backend
     depends_on:
