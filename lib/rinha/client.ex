@@ -18,15 +18,21 @@ defmodule Rinha.Processor.Client do
       end
 
     case Finch.build(:post, url, @headers, payload)
-         |> Finch.request(Rinha.Finch) do
-      {:ok, %{status: 200}} -> processor
-      _ -> call(payload)
+         |> Finch.request(Rinha.FinchPayments) do
+      {:ok, %{status: 200}} ->
+        processor
+
+      {:ok, %{status: 422}} ->
+        processor
+
+      _ ->
+        call(payload)
     end
   end
 
   def default_health do
     case Finch.build(:get, "#{@default}/service-health")
-         |> Finch.request(Rinha.Finch) do
+         |> Finch.request(Rinha.FinchPaymentsHealth) do
       {:ok, %{status: 200, body: body}} ->
         {:ok, parse_payload!(body)}
 
@@ -41,7 +47,7 @@ defmodule Rinha.Processor.Client do
 
   def fallback_health do
     case Finch.build(:get, "#{@fallback}/service-health")
-         |> Finch.request(Rinha.Finch) do
+         |> Finch.request(Rinha.FinchPaymentsHealth) do
       {:ok, %{status: 200, body: body}} ->
         {:ok, parse_payload!(body)}
 

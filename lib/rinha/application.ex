@@ -12,9 +12,16 @@ defmodule Rinha.Application do
       Rinha.Processor.Health,
       {Task.Supervisor, name: Rinha.TaskSupervisor},
       {Finch,
-       name: Rinha.Finch,
+       name: Rinha.FinchPayments,
        pools: %{
-         :default => [size: 350, count: 1]
+         Application.get_env(:rinha, :default_processor) => [size: 200, count: 1],
+         Application.get_env(:rinha, :fallback_processor) => [size: 200, count: 1]
+       }},
+      {Finch,
+       name: Rinha.FinchPaymentsHealth,
+       pools: %{
+         Application.get_env(:rinha, :default_processor) => [size: 1, count: 1],
+         Application.get_env(:rinha, :fallback_processor) => [size: 1, count: 1]
        }},
       {Bandit, plug: Rinha.Router, port: 9999}
     ]
