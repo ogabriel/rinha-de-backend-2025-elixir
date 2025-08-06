@@ -11,23 +11,20 @@ defmodule Rinha.Router do
 
   post "/payments" do
     {:ok, body, _} = Plug.Conn.read_body(conn)
-    # TODO: improve parsing of json
-    # JSON.decode("{\"a\": 1.2}", %{b: 1}, object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end, float: & &1)
 
     Task.async(fn ->
-      {:ok, body} = JSON.decode(body)
-
-      body = Map.put(body, "requestedAt", DateTime.utc_now() |> DateTime.to_iso8601())
+      {body, :ok, _} =
+        JSON.decode(body, {:requestedAt, DateTime.utc_now() |> DateTime.to_iso8601()},
+          object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end,
+          object_finish: fn acc, old_acc -> {Map.new([old_acc | acc]), :ok} end,
+          float: & &1
+        )
 
       processor = Rinha.ProcessorClient.call(JSON.encode_to_iodata!(body))
 
-      Rinha.Payments.insert(%{
-        correlationId: body["correlationId"],
-        # TOOD: fix decimal
-        amount: body["amount"],
-        processor: processor,
-        requestedAt: body["requestedAt"]
-      })
+      body = Map.put(body, :processor, processor)
+
+      Rinha.Payments.insert(body)
     end)
 
     send_resp(conn, 200, "")
