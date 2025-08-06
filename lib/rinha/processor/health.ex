@@ -17,8 +17,8 @@ defmodule Rinha.Processor.Health do
     [default_result, fallback_result] =
       Task.await_many(
         [
-          Task.async(fn -> Rinha.ProcessorClient.default_health() end),
-          Task.async(fn -> Rinha.ProcessorClient.fallback_health() end)
+          Task.async(fn -> Rinha.Processor.Client.default_health() end),
+          Task.async(fn -> Rinha.Processor.Client.fallback_health() end)
         ],
         :infinity
       )

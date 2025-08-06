@@ -20,7 +20,7 @@ defmodule Rinha.Router do
           float: & &1
         )
 
-      processor = Rinha.ProcessorClient.call(JSON.encode_to_iodata!(body))
+      processor = Rinha.Processor.Client.call(JSON.encode_to_iodata!(body))
 
       body = Map.put(body, :processor, processor)
 

@@ -1,4 +1,4 @@
-defmodule Rinha.ProcessorClient do
+defmodule Rinha.Processor.Client do
   @default "#{Application.compile_env(:rinha, :default_processor)}/payments"
   @fallback "#{Application.compile_env(:rinha, :fallback_processor)}/payments"
   @headers [
