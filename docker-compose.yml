@@ -24,11 +24,12 @@ services:
       target: release
     environment: &env_app1
       MIX_ENV: prod
-      SECRET_KEY_BASE: xUZ2aYKI10TzUGY4juCkDIpip9LaDi8KOj0emd8HOHiFZh2zKT5sLXg+0/wzHfnw
-      ERL_MAX_PORTS: 2046
-      PORT: 9999
+      ERL_MAX_PORTS: 4096
       RELEASE_DISTRIBUTION: name
-      RELEASE_NODE: app1@127.0.0.1
+      RELEASE_NODE: app@app1.com
+      RELEASE_COOKIE: rinha
+      CONNECT_TO_NODE: app@app2.com
+    hostname: app1.com
     command: ["migrate_and_release"]
     networks:
       - backend
@@ -45,8 +46,8 @@ services:
       - app1
     environment:
       <<: *env_app1
-      PORT: 9999
-      RELEASE_NODE: app2@127.0.0.1
+      RELEASE_NODE: app@app2.com
+    hostname: app2.com
     command: ["release"]
 
 networks:

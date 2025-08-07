@@ -39,17 +39,25 @@ defmodule Rinha.Router do
       default_amount: default_amount,
       fallback_requests: fallback_requests,
       fallback_amount: fallback_amount
-    } =
-      Rinha.Payments.summary(from, to)
+    } = Rinha.Payments.summary(from, to)
+
+    [node] = Node.list()
+
+    %{
+      default_requests: default_requests_node,
+      default_amount: default_amount_node,
+      fallback_requests: fallback_requests_node,
+      fallback_amount: fallback_amount_node
+    } = :erpc.call(node, Rinha.Payments, :summary, [from, to], :infinity)
 
     result = %{
       default: %{
-        totalRequests: default_requests,
-        totalAmount: default_amount / 100
+        totalRequests: default_requests + default_requests_node,
+        totalAmount: (default_amount + default_amount_node) / 100
       },
       fallback: %{
-        totalRequests: fallback_requests,
-        totalAmount: fallback_amount / 100
+        totalRequests: fallback_requests + fallback_requests_node,
+        totalAmount: (fallback_amount + fallback_amount_node) / 100
       }
     }
 

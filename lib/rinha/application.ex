@@ -7,6 +7,8 @@ defmodule Rinha.Application do
 
   @impl true
   def start(_type, _args) do
+    connect_to_node()
+
     children = [
       Rinha.Payments,
       Rinha.Processor.Health,
@@ -39,6 +41,19 @@ defmodule Rinha.Application do
       [PlugCodeReloader.Server | children]
     else
       children
+    end
+  end
+
+  defp connect_to_node() do
+    if !Code.ensure_loaded?(Mix) && node() == :"app@app1.com" do
+      case Node.connect(:"app@app2.com") do
+        true ->
+          :ok
+
+        _ ->
+          :timer.sleep(1000)
+          connect_to_node()
+      end
     end
   end
 end

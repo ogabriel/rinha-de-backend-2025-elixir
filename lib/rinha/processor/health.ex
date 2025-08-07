@@ -8,7 +8,9 @@ defmodule Rinha.Processor.Health do
   def init(_) do
     :ets.new(__MODULE__, [:set, :public, :named_table, read_concurrency: true])
 
-    Process.send_after(self(), :check_health, 1_000)
+    if !Code.ensure_loaded?(Mix) && node() == :"app@app1.com" do
+      Process.send_after(self(), :check_health, 1_000)
+    end
 
     {:ok, nil}
   end
@@ -23,9 +25,14 @@ defmodule Rinha.Processor.Health do
         :infinity
       )
 
-    default_result
-    |> parse_best_processor(fallback_result)
-    |> set_best_processor()
+    processor = parse_best_processor(default_result, fallback_result)
+
+    set_best_processor(processor)
+
+    if !Code.ensure_loaded?(Mix) && node() == :"app@app1.com" do
+      [node] = Node.list()
+      :erpc.call(node, Rinha.Processor.Health, :set_best_processor, [processor], :infinity)
+    end
 
     Process.send_after(self(), :check_health, 5_000)
 
