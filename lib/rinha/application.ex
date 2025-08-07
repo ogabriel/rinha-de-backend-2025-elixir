@@ -14,8 +14,8 @@ defmodule Rinha.Application do
       {Finch,
        name: Rinha.FinchPayments,
        pools: %{
-         Application.get_env(:rinha, :default_processor) => [size: 200, count: 1],
-         Application.get_env(:rinha, :fallback_processor) => [size: 200, count: 1]
+         Application.get_env(:rinha, :default_processor) => [size: 75, count: 2],
+         Application.get_env(:rinha, :fallback_processor) => [size: 75, count: 2]
        }},
       {Finch,
        name: Rinha.FinchPaymentsHealth,
