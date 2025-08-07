@@ -30,7 +30,6 @@ services:
       RELEASE_COOKIE: rinha
       CONNECT_TO_NODE: app@app2.com
     hostname: app1.com
-    command: ["migrate_and_release"]
     networks:
       - backend
       - payment-processor
@@ -48,7 +47,6 @@ services:
       <<: *env_app1
       RELEASE_NODE: app@app2.com
     hostname: app2.com
-    command: ["release"]
 
 networks:
   backend:
