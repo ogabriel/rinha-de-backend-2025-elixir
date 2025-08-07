@@ -6,7 +6,7 @@ defmodule Rinha.Processor.Health do
   end
 
   def init(_) do
-    :ets.new(__MODULE__, [:set, :public, :named_table])
+    :ets.new(__MODULE__, [:set, :public, :named_table, read_concurrency: true])
 
     Process.send_after(self(), :check_health, 1_000)
 
@@ -30,15 +30,6 @@ defmodule Rinha.Processor.Health do
     Process.send_after(self(), :check_health, 5_000)
 
     {:noreply, state}
-  end
-
-  def parse_best_processor(result) do
-    case result do
-      [{:default, :ok}, {:fallback, :ok}] -> :default
-      [{:default, :ok}, {:fallback, :error}] -> :default
-      [{:default, :error}, {:fallback, :ok}] -> :fallback
-      [{:default, :error}, {:fallback, :error}] -> :fallback
-    end
   end
 
   def parse_best_processor(:error, :error), do: :default
