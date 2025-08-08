@@ -6,7 +6,14 @@ defmodule Rinha.Payments do
   end
 
   def init(_) do
-    :ets.new(__MODULE__, [:set, :public, :named_table])
+    :ets.new(__MODULE__, [
+      :set,
+      :public,
+      :named_table,
+      write_concurrency: true,
+      read_concurrency: true,
+      decentralized_counters: true
+    ])
 
     {:ok, nil}
   end

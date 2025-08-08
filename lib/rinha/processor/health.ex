@@ -6,7 +6,7 @@ defmodule Rinha.Processor.Health do
   end
 
   def init(_) do
-    :ets.new(__MODULE__, [:set, :public, :named_table, read_concurrency: true])
+    :ets.new(__MODULE__, [:set, :public, :named_table, read_concurrency: true, decentralized_counters: true])
 
     if !Code.ensure_loaded?(Mix) && node() == :"app@app1.com" do
       Process.send_after(self(), :check_health, 1_000)
