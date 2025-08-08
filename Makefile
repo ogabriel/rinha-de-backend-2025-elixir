@@ -1,11 +1,16 @@
 # fast way to start test
 # standalone way to do test
 
-backend-%:
-	docker compose $(subst backend-,,$@)
+exec-%:
+	docker compose exec $(subst exec-,,$@) sh
 
 backend-up-build:
 	docker compose up --build
+
+
+backend-%:
+	docker compose $(subst backend-,,$@)
+
 
 processor-%:
 	docker compose -f ../rinha-de-backend-2025/payment-processor/docker-compose.yml $(subst processor-,,$@)
