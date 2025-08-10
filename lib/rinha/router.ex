@@ -12,20 +12,7 @@ defmodule Rinha.Router do
   post "/payments" do
     {:ok, body, _} = Plug.Conn.read_body(conn)
 
-    Task.Supervisor.start_child(Rinha.TaskSupervisor, fn ->
-      {body, :ok, _} =
-        JSON.decode(body, {:requestedAt, DateTime.utc_now()},
-          object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end,
-          object_finish: fn acc, old_acc -> {Map.new([old_acc | acc]), :ok} end,
-          float: & &1
-        )
-
-      processor = Rinha.Processor.Client.call(JSON.encode_to_iodata!(body))
-
-      body = Map.put(body, :processor, processor)
-
-      Rinha.Payments.insert(body)
-    end)
+    Task.Supervisor.start_child(Rinha.TaskSupervisor, Rinha.Processor, :call, [DateTime.utc_now(), body])
 
     send_resp(conn, 200, "")
   end
