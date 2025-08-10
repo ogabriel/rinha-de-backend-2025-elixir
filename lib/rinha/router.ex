@@ -1,10 +1,10 @@
 defmodule Rinha.Router do
   use Plug.Router
 
-  # if Code.ensure_loaded?(Mix) && Mix.env() == :dev do
-  #   plug(PlugCodeReloader)
-  #   plug(Plug.Logger)
-  # end
+  if Code.ensure_loaded?(Mix) && Mix.env() == :dev do
+    plug(PlugCodeReloader)
+    plug(Plug.Logger)
+  end
 
   plug(:match)
   plug(:dispatch)
@@ -80,6 +80,10 @@ defmodule Rinha.Router do
 
   post "/purge-payments" do
     Rinha.Payments.delete_all()
+
+    [node] = Node.list()
+
+    :erpc.call(node, Rinha.Payments, :delete_all, [], :infinity)
 
     send_resp(conn, 200, "")
   end
