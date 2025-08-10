@@ -27,9 +27,8 @@ defmodule Rinha.Payments do
     :ets.insert(__MODULE__, {correlationId, parse_amount(amount), processor, parse_requested_at(requestedAt)})
   end
 
-  # TODO: this can probably be improved
-  defp parse_amount(float) do
-    charlist = :erlang.float_to_list(float, [:short])
+  defp parse_amount(binary) do
+    charlist = :erlang.binary_to_list(binary)
 
     intlist =
       case :lists.splitwith(&(&1 != ?.), charlist) do
