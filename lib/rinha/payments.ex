@@ -60,15 +60,15 @@ defmodule Rinha.Payments do
   end
 
   defp build_match(from, nil) do
-    [{:>, :"$4", from}]
+    [{:>=, :"$4", from}]
   end
 
   defp build_match(nil, to) do
-    [{:<, :"$4", to}]
+    [{:"=<", :"$4", to}]
   end
 
   defp build_match(from, to) do
-    [{:andalso, {:>, :"$4", from}, {:<, :"$4", to}}]
+    [{:andalso, {:>=, :"$4", from}, {:"=<", :"$4", to}}]
   end
 
   defp parse_summary(result) do
