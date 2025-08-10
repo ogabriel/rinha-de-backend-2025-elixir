@@ -18,7 +18,7 @@ defmodule Rinha.Processor.Client do
       end
 
     case Finch.build(:post, url, @headers, payload)
-         |> Finch.request(Rinha.FinchPayments, pool_timeout: 5_000) do
+         |> Finch.request(Rinha.FinchPayments, pool_timeout: 25_000) do
       {:ok, %{status: 200}} ->
         processor
 

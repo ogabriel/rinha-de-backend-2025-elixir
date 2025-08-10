@@ -24,7 +24,7 @@ defmodule Rinha.Payments do
         processor: processor,
         requestedAt: requestedAt
       }) do
-    :ets.insert(__MODULE__, {correlationId, parse_amount(amount), processor, requestedAt})
+    :ets.insert(__MODULE__, {correlationId, parse_amount(amount), processor, parse_requested_at(requestedAt)})
   end
 
   # TODO: this can probably be improved
@@ -38,6 +38,10 @@ defmodule Rinha.Payments do
       end
 
     List.to_integer(intlist)
+  end
+
+  defp parse_requested_at(requested_at) do
+    DateTime.to_unix(requested_at, :millisecond)
   end
 
   def summary(from, to) do

@@ -14,7 +14,7 @@ defmodule Rinha.Router do
 
     Task.Supervisor.start_child(Rinha.TaskSupervisor, fn ->
       {body, :ok, _} =
-        JSON.decode(body, {:requestedAt, DateTime.utc_now() |> DateTime.to_iso8601()},
+        JSON.decode(body, {:requestedAt, DateTime.utc_now()},
           object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end,
           object_finish: fn acc, old_acc -> {Map.new([old_acc | acc]), :ok} end
           # float: & &1
@@ -31,8 +31,7 @@ defmodule Rinha.Router do
   end
 
   get "/payments-summary" do
-    # TODO: fix date format
-    %{"from" => from, "to" => to} = Plug.Conn.Query.decode(conn.query_string)
+    {from, to} = parse_dates(Plug.Conn.Query.decode(conn.query_string))
 
     %{
       default_requests: default_requests,
@@ -63,6 +62,21 @@ defmodule Rinha.Router do
 
     send_resp(conn, 200, JSON.encode_to_iodata!(result))
   end
+
+  defp parse_dates(decoded) do
+    {from, to} =
+      case decoded do
+        %{"from" => from, "to" => to} -> {from, to}
+        %{"from" => from} -> {from, nil}
+        %{"to" => to} -> {nil, to}
+      end
+
+    {parse(from), parse(to)}
+  end
+
+  defp parse(nil), do: nil
+  defp parse(""), do: nil
+  defp parse(date), do: DateTime.from_iso8601(date) |> elem(1) |> DateTime.to_unix(:millisecond)
 
   post "/purge-payments" do
     Rinha.Payments.delete_all()
