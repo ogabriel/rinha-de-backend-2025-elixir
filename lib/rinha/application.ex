@@ -3,6 +3,9 @@ defmodule Rinha.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  @default_url "http://#{Application.compile_env(:rinha, :default_host)}:#{Application.compile_env(:rinha, :default_port)}"
+  @fallback_url "http://#{Application.compile_env(:rinha, :fallback_host)}:#{Application.compile_env(:rinha, :fallback_port)}"
+
   use Application
 
   @impl true
@@ -16,13 +19,14 @@ defmodule Rinha.Application do
       {Finch,
        name: Rinha.FinchPayments,
        pools: %{
-         :default => [size: 200, count: 1, conn_max_idle_time: 10_000]
+         @default_url => [size: 100, count: 1, conn_max_idle_time: 10_000],
+         @fallback_url => [size: 100, count: 1, conn_max_idle_time: 10_000]
        }},
       {Finch,
        name: Rinha.FinchPaymentsHealth,
        pools: %{
-         Application.get_env(:rinha, :default_processor) => [size: 1, count: 1],
-         Application.get_env(:rinha, :fallback_processor) => [size: 1, count: 1]
+         @default_url => [size: 1, count: 1],
+         @fallback_url => [size: 1, count: 1]
        }},
       {Bandit, plug: Rinha.Router, port: 9999}
     ]
