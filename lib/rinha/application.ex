@@ -19,8 +19,8 @@ defmodule Rinha.Application do
       {Finch,
        name: Rinha.FinchPayments,
        pools: %{
-         @default_url => [size: 100, count: 1, conn_max_idle_time: 10_000],
-         @fallback_url => [size: 100, count: 1, conn_max_idle_time: 10_000]
+         @default_url => [size: 150, count: 1, conn_max_idle_time: 20_000],
+         @fallback_url => [size: 150, count: 1, conn_max_idle_time: 20_000]
        }},
       {Finch,
        name: Rinha.FinchPaymentsHealth,
