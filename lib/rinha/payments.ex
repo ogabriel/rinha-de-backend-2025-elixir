@@ -18,29 +18,8 @@ defmodule Rinha.Payments do
     {:ok, nil}
   end
 
-  def insert(%{
-        correlationId: correlationId,
-        amount: amount,
-        processor: processor,
-        requestedAt: requestedAt
-      }) do
-    :ets.insert(__MODULE__, {correlationId, parse_amount(amount), processor, parse_requested_at(requestedAt)})
-  end
-
-  defp parse_amount(binary) do
-    charlist = :erlang.binary_to_list(binary)
-
-    intlist =
-      case :lists.splitwith(&(&1 != ?.), charlist) do
-        {int, [?., rest]} -> int ++ [rest, ?0]
-        {int, [?. | rest]} -> int ++ rest
-      end
-
-    List.to_integer(intlist)
-  end
-
-  defp parse_requested_at(requested_at) do
-    DateTime.to_unix(requested_at, :millisecond)
+  def insert(correlation_id, amount, processor, requested_at) do
+    :ets.insert(__MODULE__, {correlation_id, amount, processor, requested_at})
   end
 
   def summary(from, to) do

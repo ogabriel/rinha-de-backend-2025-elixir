@@ -7,10 +7,27 @@ defmodule Rinha.Processor do
         float: & &1
       )
 
+    correlation_id = body.correlationId
+    amount = parse_amount(body.amount)
+    requested_at = parse_requested_at(body.requestedAt)
     processor = Rinha.Processor.Client.call(JSON.encode_to_iodata!(body))
 
-    body = Map.put(body, :processor, processor)
+    Rinha.Payments.insert(correlation_id, amount, processor, requested_at)
+  end
 
-    Rinha.Payments.insert(body)
+  defp parse_amount(binary) do
+    charlist = :erlang.binary_to_list(binary)
+
+    intlist =
+      case :lists.splitwith(&(&1 != ?.), charlist) do
+        {int, [?., rest]} -> int ++ [rest, ?0]
+        {int, [?. | rest]} -> int ++ rest
+      end
+
+    List.to_integer(intlist)
+  end
+
+  defp parse_requested_at(requested_at) do
+    DateTime.to_unix(requested_at, :millisecond)
   end
 end
