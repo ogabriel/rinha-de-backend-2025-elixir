@@ -7,10 +7,8 @@ exec-%:
 backend-up-build:
 	docker compose up --build
 
-
 backend-%:
 	docker compose $(subst backend-,,$@)
-
 
 processor-%:
 	docker compose -f ../rinha-de-backend-2025/payment-processor/docker-compose.yml $(subst processor-,,$@)
@@ -25,7 +23,10 @@ test:
 	make start-test
 
 start-test:
-	K6_WEB_DASHBOARD=true k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
+	K6_WEB_DASHBOARD=true MAX_REQUESTS=550 k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
 
 start-test-low:
-	MAX_REQUESTS=100 K6_WEB_DASHBOARD=true k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
+	K6_WEB_DASHBOARD=true MAX_REQUESTS=100 k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
+
+start-test-high:
+	K6_WEB_DASHBOARD=true MAX_REQUESTS=1100 k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
