@@ -41,17 +41,21 @@ defmodule Rinha.Processor.Health do
 
   def parse_best_processor(:error, :error), do: :default
   def parse_best_processor({:ok, _}, :error), do: :default
-  def parse_best_processor(:error, {:ok, _}), do: :fallback
-  def parse_best_processor({:ok, _}, {:ok, %{failing: true}}), do: :default
-  def parse_best_processor({:ok, %{failing: true}}, {:ok, _}), do: :fallback
 
-  def parse_best_processor({:ok, %{minResponseTime: default}}, {:ok, %{minResponseTime: fallback}}) do
-    if default <= fallback + 100 do
-      :default
-    else
-      :fallback
+  def parse_best_processor(
+        {:ok, %{failing: failing_default, minResponseTime: response_default}},
+        {:ok, %{failing: failing_fallback, minResponseTime: response_fallback}}
+      ) do
+    cond do
+      failing_default && failing_fallback -> :failing
+      !failing_default && failing_fallback -> :default
+      failing_default && !failing_fallback -> :fallback
+      (response_fallback + 100) * 1.5 < response_default -> :fallback
+      true -> :default
     end
   end
+
+  def parse_best_processor(_, _), do: :default
 
   def set_best_processor(processor) do
     :ets.insert(__MODULE__, {:processor, processor})

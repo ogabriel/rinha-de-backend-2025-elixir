@@ -1,5 +1,7 @@
 import Config
 
 config :rinha,
-  default_processor: "http://payment-processor-default:8080",
-  fallback_processor: "http://payment-processor-fallback:8080"
+  default_host: "payment-processor-default",
+  default_port: 8080,
+  fallback_host: "payment-processor-fallback",
+  fallback_port: 8080

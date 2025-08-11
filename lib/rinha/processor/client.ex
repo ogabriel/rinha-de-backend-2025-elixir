@@ -13,33 +13,52 @@ defmodule Rinha.Processor.Client do
   ]
 
   def call(payload) do
-    processor = Rinha.Processor.Health.get_best_processor()
+    call(Rinha.Processor.Health.get_best_processor(), payload)
+  end
 
-    {host, port} =
-      case processor do
-        :default -> {@default_host, @default_port}
-        :fallback -> {@fallback_host, @fallback_port}
-      end
+  defp call(:failing, payload) do
+    :timer.sleep(1000)
+    call(Rinha.Processor.Health.get_best_processor(), payload)
+  end
 
+  defp call(:default, payload) do
     case %Finch.Request{
            scheme: :http,
-           host: host,
-           port: port,
+           host: @default_host,
+           port: @default_port,
            method: @post,
            path: @payments_path,
            headers: @headers,
            query: nil,
            body: payload
          }
-         |> Finch.request(Rinha.FinchPayments, pool_timeout: 10_000) do
+         |> Finch.request(Rinha.FinchPayments) do
       {:ok, %{status: 200}} ->
-        processor
+        :default
 
       {:ok, %{status: 422}} ->
-        processor
+        :default
 
       _ ->
-        call(payload)
+        call(Rinha.Processor.Health.get_best_processor(), payload)
+    end
+  end
+
+  defp call(:fallback, payload) do
+    case %Finch.Request{
+           scheme: :http,
+           host: @fallback_host,
+           port: @fallback_port,
+           method: @post,
+           path: @payments_path,
+           headers: @headers,
+           query: nil,
+           body: payload
+         }
+         |> Finch.request(Rinha.FinchPayments) do
+      {:ok, %{status: 200}} -> :fallback
+      {:ok, %{status: 422}} -> :fallback
+      _ -> call(Rinha.Processor.Health.get_best_processor(), payload)
     end
   end
 

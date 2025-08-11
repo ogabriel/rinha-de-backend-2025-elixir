@@ -1,5 +1,7 @@
 import Config
 
 config :rinha,
-  default_processor: "http://localhost:8001",
-  fallback_processor: "http://localhost:8002"
+  default_host: "localhost",
+  default_port: 8001,
+  fallback_host: "localhost",
+  fallback_port: 8002
