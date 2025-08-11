@@ -78,6 +78,7 @@ defmodule Rinha.Processor.Client do
         {:ok, parse_payload!(body)}
 
       {:ok, %{status: 429}} ->
+        :timer.sleep(100)
         default_health()
 
       _ ->
@@ -101,6 +102,7 @@ defmodule Rinha.Processor.Client do
         {:ok, parse_payload!(body)}
 
       {:ok, %{status: 429}} ->
+        :timer.sleep(100)
         fallback_health()
 
       _ ->
