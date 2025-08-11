@@ -34,13 +34,13 @@ defmodule Rinha.Processor.Health do
       :erpc.call(node, Rinha.Processor.Health, :set_best_processor, [processor], :infinity)
     end
 
-    Process.send_after(self(), :check_health, 5_000)
+    Process.send_after(self(), :check_health, 4_900)
 
     {:noreply, state}
   end
 
-  def parse_best_processor(:error, :error), do: :default
-  def parse_best_processor({:ok, _}, :error), do: :default
+  def parse_best_processor(:error, :error), do: :failing
+  def parse_best_processor({:ok, %{failing: false}}, :error), do: :default
 
   def parse_best_processor(
         {:ok, %{failing: failing_default, minResponseTime: response_default}},
@@ -54,8 +54,6 @@ defmodule Rinha.Processor.Health do
       true -> :default
     end
   end
-
-  def parse_best_processor(_, _), do: :default
 
   def set_best_processor(processor) do
     :ets.insert(__MODULE__, {:processor, processor})
