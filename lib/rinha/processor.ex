@@ -13,11 +13,9 @@ defmodule Rinha.Processor do
     amount = parse_amount(body.amount)
     requested_at = parse_requested_at(body.requestedAt)
 
-    Rinha.Payments.insert({correlation_id, :wait, amount, requested_at})
-
     processor = Rinha.Processor.Client.call(JSON.encode_to_iodata!(body))
 
-    Rinha.Payments.update(correlation_id, {2, processor})
+    Rinha.Payments.insert({correlation_id, processor, amount, requested_at})
   end
 
   defp parse_amount(binary) do

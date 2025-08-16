@@ -15,16 +15,12 @@ defmodule Rinha.Payments do
     :ets.insert(__MODULE__, data)
   end
 
-  def update(key, value) do
-    :ets.update_element(__MODULE__, key, value)
-  end
-
   def summary(from, to) do
     __MODULE__
     |> :ets.select([
       {
         {:"$1", :"$2", :"$3", :"$4"},
-        [{:andalso, {:"/=", :"$2", :wait}, build_match(from, to)}],
+        [build_match(from, to)],
         [{{:"$2", :"$3"}}]
       }
     ])
