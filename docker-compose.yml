@@ -1,9 +1,8 @@
 services:
-  nginx:
-    image: nginx:mainline-alpine3.22
+  haproxy:
+    image: haproxy:3.1.8-alpine3.22
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    command: ["nginx", "-g", "daemon off;"]
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
     ports:
       - 9999:9999
     networks:
@@ -16,6 +15,7 @@ services:
         limits:
           cpus: '0.2'
           memory: '40MB'
+
 
   app1: &app1
     image: ogabriel/rinha-de-backend-2025:elixir
