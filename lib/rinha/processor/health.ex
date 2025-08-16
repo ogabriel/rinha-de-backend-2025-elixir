@@ -16,6 +16,8 @@ defmodule Rinha.Processor.Health do
   end
 
   def handle_info(:check_health, state) do
+    set_best_processor_parallel(:wait)
+
     [default_result, fallback_result] =
       Task.await_many(
         [
@@ -27,19 +29,14 @@ defmodule Rinha.Processor.Health do
 
     processor = parse_best_processor(default_result, fallback_result)
 
-    set_best_processor(processor)
-
-    if !Code.ensure_loaded?(Mix) && node() == :"app@app1.com" do
-      [node] = Node.list()
-      :erpc.call(node, Rinha.Processor.Health, :set_best_processor, [processor], :infinity)
-    end
+    set_best_processor_parallel(processor)
 
     Process.send_after(self(), :check_health, 4_900)
 
     {:noreply, state}
   end
 
-  def parse_best_processor(:error, :error), do: :failing
+  def parse_best_processor(:error, :error), do: :wait
   def parse_best_processor({:ok, %{failing: false}}, :error), do: :default
 
   def parse_best_processor(
@@ -47,7 +44,7 @@ defmodule Rinha.Processor.Health do
         {:ok, %{failing: failing_fallback, minResponseTime: response_fallback}}
       ) do
     cond do
-      failing_default && failing_fallback -> :failing
+      failing_default && failing_fallback -> :wait
       !failing_default && failing_fallback -> :default
       failing_default && !failing_fallback -> :fallback
       (response_fallback + 100) * 1.5 < response_default -> :fallback
@@ -55,14 +52,26 @@ defmodule Rinha.Processor.Health do
     end
   end
 
+  def set_best_processor_parallel(processor) do
+    Task.await_many(
+      [
+        Task.async(fn -> set_best_processor(processor) end),
+        Task.async(fn ->
+          if !Code.ensure_loaded?(Mix) && node() == :"app@app1.com" do
+            [node] = Node.list()
+            :erpc.call(node, Rinha.Processor.Health, :set_best_processor, [processor], :infinity)
+          end
+        end)
+      ],
+      :infinity
+    )
+  end
+
   def set_best_processor(processor) do
     :ets.insert(__MODULE__, {:processor, processor})
   end
 
   def get_best_processor() do
-    case :ets.lookup(__MODULE__, :processor) do
-      processor: processor -> processor
-      _ -> :default
-    end
+    :ets.lookup_element(__MODULE__, :processor, 2, :wait)
   end
 end

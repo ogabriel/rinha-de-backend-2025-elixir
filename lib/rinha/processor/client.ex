@@ -16,8 +16,8 @@ defmodule Rinha.Processor.Client do
     call(Rinha.Processor.Health.get_best_processor(), payload)
   end
 
-  defp call(:failing, payload) do
-    :timer.sleep(1000)
+  defp call(:wait, payload) do
+    :timer.sleep(100)
     call(Rinha.Processor.Health.get_best_processor(), payload)
   end
 
