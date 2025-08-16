@@ -12,7 +12,7 @@ defmodule Rinha.Router do
   post "/payments" do
     {:ok, body, _} = Plug.Conn.read_body(conn)
 
-    Task.Supervisor.start_child(Rinha.TaskSupervisor, Rinha.Processor, :call, [DateTime.utc_now(), body])
+    Task.Supervisor.start_child(Rinha.TaskSupervisor, Rinha.Processor, :call, [body])
 
     send_resp(conn, 200, "")
   end

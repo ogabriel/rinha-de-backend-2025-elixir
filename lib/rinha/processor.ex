@@ -1,5 +1,7 @@
 defmodule Rinha.Processor do
-  def call(requested_at, body) do
+  def call(body) do
+    requested_at = DateTime.utc_now() |> DateTime.truncate(:millisecond)
+
     {body, :ok, _} =
       JSON.decode(body, {:requestedAt, requested_at},
         object_push: fn key, value, acc -> [{String.to_atom(key), value} | acc] end,
