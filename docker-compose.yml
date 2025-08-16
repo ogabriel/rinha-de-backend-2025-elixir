@@ -18,7 +18,7 @@ services:
           memory: '40MB'
 
   app1: &app1
-    image: ogabriel/rinha-de-backend-2025:elixir
+    image: ogabriel/rinha-de-backend-2025:elixir-alt
     build:
       context: .
       dockerfile: Dockerfile
