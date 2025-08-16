@@ -56,6 +56,7 @@ defmodule Rinha.Router do
         %{"from" => from, "to" => to} -> {from, to}
         %{"from" => from} -> {from, nil}
         %{"to" => to} -> {nil, to}
+        _ -> {nil, nil}
       end
 
     {parse(from), parse(to)}
