@@ -11,8 +11,12 @@ defmodule Rinha.Payments do
     {:ok, nil}
   end
 
-  def insert(correlation_id, amount, processor, requested_at) do
-    :ets.insert(__MODULE__, {correlation_id, amount, processor, requested_at})
+  def insert(data) do
+    :ets.insert(__MODULE__, data)
+  end
+
+  def update(key, value) do
+    :ets.update_element(__MODULE__, key, value)
   end
 
   def summary(from, to) do
@@ -20,27 +24,27 @@ defmodule Rinha.Payments do
     |> :ets.select([
       {
         {:"$1", :"$2", :"$3", :"$4"},
-        build_match(from, to),
-        [{{:"$3", :"$2"}}]
+        [{:andalso, {:"/=", :"$2", :wait}, build_match(from, to)}],
+        [{{:"$2", :"$3"}}]
       }
     ])
     |> parse_summary()
   end
 
   defp build_match(nil, nil) do
-    []
+    true
   end
 
   defp build_match(from, nil) do
-    [{:>=, :"$4", from}]
+    {:>=, :"$4", from}
   end
 
   defp build_match(nil, to) do
-    [{:"=<", :"$4", to}]
+    {:"=<", :"$4", to}
   end
 
   defp build_match(from, to) do
-    [{:andalso, {:>=, :"$4", from}, {:"=<", :"$4", to}}]
+    {:andalso, {:>=, :"$4", from}, {:"=<", :"$4", to}}
   end
 
   defp parse_summary(result) do
