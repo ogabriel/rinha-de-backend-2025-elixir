@@ -24,7 +24,6 @@ defmodule Rinha.Payments do
     |> :ets.select([
       {
         {:"$1", :"$2", :"$3", :"$4"},
-        # [{:andalso, {:"/=", :"$2", :wait}, build_match(from, to)}],
         [{:andalso, {:"/=", :"$2", :wait}, build_match(from, to)}],
         [{{:"$2", :"$3"}}]
       }
@@ -50,12 +49,9 @@ defmodule Rinha.Payments do
 
   defp parse_summary(result) do
     result
-    |> Enum.reduce(%{default_requests: 0, default_amount: 0, fallback_requests: 0, fallback_amount: 0}, fn
+    |> Enum.reduce(%{default_requests: 0, default_amount: 0}, fn
       {:default, amount}, %{default_requests: default_requests, default_amount: default_amount} = acc ->
         %{acc | default_requests: default_requests + 1, default_amount: default_amount + amount}
-
-      {:fallback, amount}, %{fallback_requests: fallback_requests, fallback_amount: fallback_amount} = acc ->
-        %{acc | fallback_requests: fallback_requests + 1, fallback_amount: fallback_amount + amount}
     end)
   end
 

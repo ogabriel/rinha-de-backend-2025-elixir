@@ -18,16 +18,9 @@ defmodule Rinha.Processor.Health do
   def handle_info(:check_health, state) do
     set_best_processor_parallel(:wait)
 
-    [default_result, fallback_result] =
-      Task.await_many(
-        [
-          Task.async(fn -> Rinha.Processor.Client.default_health() end),
-          Task.async(fn -> Rinha.Processor.Client.fallback_health() end)
-        ],
-        :infinity
-      )
+    default_result = Rinha.Processor.Client.default_health()
 
-    processor = parse_best_processor(default_result, fallback_result)
+    processor = parse_best_processor(default_result)
 
     set_best_processor_parallel(processor)
 
@@ -36,21 +29,9 @@ defmodule Rinha.Processor.Health do
     {:noreply, state}
   end
 
-  def parse_best_processor(:error, :error), do: :wait
-  def parse_best_processor({:ok, %{failing: false}}, :error), do: :default
-
-  def parse_best_processor(
-        {:ok, %{failing: failing_default, minResponseTime: response_default}},
-        {:ok, %{failing: failing_fallback, minResponseTime: response_fallback}}
-      ) do
-    cond do
-      failing_default && failing_fallback -> :wait
-      !failing_default && failing_fallback -> :default
-      failing_default && !failing_fallback -> :fallback
-      (response_fallback + 100) * 1.5 < response_default -> :fallback
-      true -> :default
-    end
-  end
+  def parse_best_processor(:error), do: :wait
+  def parse_best_processor({:ok, %{failing: false}}), do: :default
+  def parse_best_processor({:ok, %{failing: true}}), do: :wait
 
   def set_best_processor_parallel(processor) do
     Task.await_many(

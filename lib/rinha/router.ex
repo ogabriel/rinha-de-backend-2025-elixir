@@ -20,21 +20,13 @@ defmodule Rinha.Router do
   get "/payments-summary" do
     {from, to} = parse_dates(Plug.Conn.Query.decode(conn.query_string))
 
-    %{
-      default_requests: default_requests,
-      default_amount: default_amount,
-      fallback_requests: fallback_requests,
-      fallback_amount: fallback_amount
-    } = Rinha.Payments.summary(from, to)
+    %{default_requests: default_requests, default_amount: default_amount} =
+      Rinha.Payments.summary(from, to)
 
     [node] = Node.list()
 
-    %{
-      default_requests: default_requests_node,
-      default_amount: default_amount_node,
-      fallback_requests: fallback_requests_node,
-      fallback_amount: fallback_amount_node
-    } = :erpc.call(node, Rinha.Payments, :summary, [from, to], :infinity)
+    %{default_requests: default_requests_node, default_amount: default_amount_node} =
+      :erpc.call(node, Rinha.Payments, :summary, [from, to], :infinity)
 
     result = %{
       default: %{
@@ -42,8 +34,8 @@ defmodule Rinha.Router do
         totalAmount: (default_amount + default_amount_node) / 100
       },
       fallback: %{
-        totalRequests: fallback_requests + fallback_requests_node,
-        totalAmount: (fallback_amount + fallback_amount_node) / 100
+        totalRequests: 0,
+        totalAmount: 0
       }
     }
 

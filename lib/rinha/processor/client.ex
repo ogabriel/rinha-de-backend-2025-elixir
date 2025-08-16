@@ -1,8 +1,6 @@
 defmodule Rinha.Processor.Client do
   @default_host Application.compile_env(:rinha, :default_host)
   @default_port Application.compile_env(:rinha, :default_port)
-  @fallback_host Application.compile_env(:rinha, :fallback_host)
-  @fallback_port Application.compile_env(:rinha, :fallback_port)
   @payments_path "/payments"
   @service_health_path "/payments/service-health"
   @get "GET"
@@ -17,7 +15,7 @@ defmodule Rinha.Processor.Client do
   end
 
   defp call(:wait, payload) do
-    :timer.sleep(100)
+    :timer.sleep(1000)
     call(Rinha.Processor.Health.get_best_processor(), payload)
   end
 
@@ -44,53 +42,11 @@ defmodule Rinha.Processor.Client do
     end
   end
 
-  defp call(:fallback, payload) do
-    case %Finch.Request{
-           scheme: :http,
-           host: @fallback_host,
-           port: @fallback_port,
-           method: @post,
-           path: @payments_path,
-           headers: @headers,
-           query: nil,
-           body: payload
-         }
-         |> Finch.request(Rinha.FinchPayments) do
-      {:ok, %{status: 200}} -> :fallback
-      {:ok, %{status: 422}} -> :fallback
-      _ -> call(Rinha.Processor.Health.get_best_processor(), payload)
-    end
-  end
-
   def default_health do
     case %Finch.Request{
            scheme: :http,
            host: @default_host,
            port: @default_port,
-           method: "GET",
-           path: @service_health_path,
-           headers: @headers,
-           query: nil,
-           body: nil
-         }
-         |> Finch.request(Rinha.FinchPaymentsHealth) do
-      {:ok, %{status: 200, body: body}} ->
-        {:ok, parse_payload!(body)}
-
-      {:ok, %{status: 429}} ->
-        :timer.sleep(100)
-        default_health()
-
-      _ ->
-        :error
-    end
-  end
-
-  def fallback_health do
-    case %Finch.Request{
-           scheme: :http,
-           host: @fallback_host,
-           port: @fallback_port,
            method: @get,
            path: @service_health_path,
            headers: @headers,
@@ -103,7 +59,7 @@ defmodule Rinha.Processor.Client do
 
       {:ok, %{status: 429}} ->
         :timer.sleep(100)
-        fallback_health()
+        default_health()
 
       _ ->
         :error

@@ -4,7 +4,6 @@ defmodule Rinha.Application do
   @moduledoc false
 
   @default_url "http://#{Application.compile_env(:rinha, :default_host)}:#{Application.compile_env(:rinha, :default_port)}"
-  @fallback_url "http://#{Application.compile_env(:rinha, :fallback_host)}:#{Application.compile_env(:rinha, :fallback_port)}"
 
   use Application
 
@@ -19,14 +18,12 @@ defmodule Rinha.Application do
       {Finch,
        name: Rinha.FinchPayments,
        pools: %{
-         @default_url => [size: 150, count: 1, conn_max_idle_time: 20_000],
-         @fallback_url => [size: 150, count: 1, conn_max_idle_time: 20_000]
+         @default_url => [size: 150, count: 1, conn_max_idle_time: 20_000]
        }},
       {Finch,
        name: Rinha.FinchPaymentsHealth,
        pools: %{
-         @default_url => [size: 1, count: 1],
-         @fallback_url => [size: 1, count: 1]
+         @default_url => [size: 1, count: 1]
        }},
       {Bandit, plug: Rinha.Router, port: 9999}
     ]
