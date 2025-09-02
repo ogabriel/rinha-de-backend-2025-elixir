@@ -22,6 +22,9 @@ test:
 	make processor-up
 	make start-test
 
+start-test-final:
+	K6_WEB_DASHBOARD=true k6 run ../rinha-de-backend-2025/rinha-test/rinha-final.js
+
 start-test:
 	K6_WEB_DASHBOARD=true MAX_REQUESTS=550 k6 run ../rinha-de-backend-2025/rinha-test/rinha.js
 
