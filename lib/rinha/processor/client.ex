@@ -32,16 +32,13 @@ defmodule Rinha.Processor.Client do
            query: nil,
            body: payload
          }
-         |> Finch.request(Rinha.FinchPayments) do
-      {:ok, %{status: 200}} ->
-        :default
-
-      {:ok, %{status: 422}} ->
-        :default
-
-      _ ->
-        call(Rinha.Processor.Health.get_best_processor(), payload)
+         |> Finch.request(Rinha.FinchPayments, pool_timeout: 2000) do
+      {:ok, %{status: 200}} -> :default
+      {:ok, %{status: 422}} -> :default
+      _ -> call(:wait, payload)
     end
+  rescue
+    _ -> call(:wait, payload)
   end
 
   defp call(:fallback, payload) do
@@ -55,11 +52,13 @@ defmodule Rinha.Processor.Client do
            query: nil,
            body: payload
          }
-         |> Finch.request(Rinha.FinchPayments) do
+         |> Finch.request(Rinha.FinchPayments, pool_timeout: 2000) do
       {:ok, %{status: 200}} -> :fallback
       {:ok, %{status: 422}} -> :fallback
-      _ -> call(Rinha.Processor.Health.get_best_processor(), payload)
+      _ -> call(:wait, payload)
     end
+  rescue
+    _ -> call(:wait, payload)
   end
 
   def default_health do
